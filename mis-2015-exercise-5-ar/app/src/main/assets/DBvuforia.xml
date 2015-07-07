@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
   <Tracking>
+    <ImageTarget name="weuthrich" size="200.000000 236.000000" />
+    <ImageTarget name="schatter" size="200.000000 237.000000" />
+    <ImageTarget name="rodehorst" size="200.000000 235.000000" />
+    <ImageTarget name="jakoby" size="200.000000 233.000000" />
+    <ImageTarget name="hornecker" size="200.000000 246.000000" />
+    <ImageTarget name="echtler" size="200.000000 242.000000" />
+    <ImageTarget name="bertel" size="200.000000 243.000000" />
     <ImageTarget name="tree" size="1024.000000 683.000000" />
     <ImageTarget name="city" size="1024.000000 505.000000" />
     <ImageTarget name="cat" size="1024.000000 768.000000" />

@@ -7,17 +7,26 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 
 package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -94,8 +104,15 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     private AlertDialog mErrorDialog;
     
     boolean mIsDroidDevice = false;
-    
-    
+
+    String[] urls={"http://www.uni-weimar.de/uploads/pics/bertel_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/echtler_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/hornecker_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/jakoby_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/rodehorst_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/schatter_web.jpg",
+            "http://www.uni-weimar.de/uploads/pics/wuethrich_web2.jpg"};
+    String[] names={"bertel","echtler","hornecker","jakoby","rodehorst","schatter","wuethrich"};
     // Called when the activity first starts or the user navigates back to an
     // activity.
     @Override
@@ -170,6 +187,10 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     
     private void loadTextures()
     {
+
+        WebView webV = new WebView(this);
+        addContentView(webV, new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT) );
+
         mTextures.add(Texture.loadTextureFromApk("TextureTeapotRed.png",
                 getAssets()));
         //change brass teapot to green
@@ -179,9 +200,69 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
             getAssets()));
         mTextures.add(Texture.loadTextureFromApk("ImageTargets/Buildings.jpeg",
             getAssets()));
+        
+        loadProfTextures();
+
     }
-    
-    
+
+    private void loadProfTextures() {
+
+        Bitmap bmp=null;
+        for(String url:urls){
+            LoadProfImage lp = new LoadProfImage(url);
+            lp.execute();
+            try {
+                bmp=lp.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            try {
+                int[] intArray = new int[bmp.getWidth()*bmp.getHeight()];
+                bmp.getPixels(intArray, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+                mTextures.add(Texture.loadTextureFromIntBuffer(intArray,bmp.getWidth(), bmp.getHeight()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private class LoadProfImage extends AsyncTask<URL, Integer,Bitmap> {
+
+        private String imgUrl;
+
+        protected LoadProfImage(String src){
+            imgUrl = src;
+        };
+
+
+        protected Bitmap doInBackground(URL... url) {
+
+            Bitmap bmp = getBitmapFromURL(imgUrl);
+
+            return bmp;
+        }
+
+    }
+    // http://stackoverflow.com/questions/11831188/how-to-get-bitmap-from-a-url-in-android
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     // Called when the activity will start interacting with the user.
     @Override
     protected void onResume()
@@ -803,3 +884,5 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 }
+
+
